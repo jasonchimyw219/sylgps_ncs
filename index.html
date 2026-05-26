@@ -97,6 +97,9 @@ body{font-family:'Noto Sans TC','Microsoft JhengHei','PingFang TC',sans-serif;
 .scCard .scN{font-size:14px;color:var(--muted);font-weight:600;}
 .scCard .scS{font-size:var(--fxl);font-weight:900;color:var(--pri);}
 .scCard.lvB .scS{color:var(--ok);}
+.scCard.active{box-shadow:0 0 0 4px var(--sec),var(--sh);transform:scale(1.06);}
+.scCard .scPick{font-size:12px;color:var(--muted);margin-top:3px;}
+.scCard.active .scPick{color:var(--sec);font-weight:700;}
 
 /* ── Game header ── */
 .gh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
@@ -352,6 +355,15 @@ body{font-family:'Noto Sans TC','Microsoft JhengHei','PingFang TC',sans-serif;
   <div class="tPanel">
     <h3>📊 分數記錄</h3>
     <div id="tScores"></div>
+  </div>
+  <div class="tPanel">
+    <h3>🤖 AI 出題（DeepSeek）</h3>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:10px;">輸入 DeepSeek API Key，當固定題目用完時自動生成新題目。API Key 免費申請：<a href="https://platform.deepseek.com" target="_blank" style="color:var(--pri)">platform.deepseek.com</a></p>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input id="aiKeyInput" type="password" placeholder="sk-..." style="flex:1;padding:10px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);color:var(--txt);font-size:14px;">
+      <button class="btn bInf bSm" onclick="AI.setKey(document.getElementById('aiKeyInput').value);alert('✅ API Key 已儲存！')">儲存</button>
+    </div>
+    <div id="aiStatus" style="margin-top:8px;font-size:13px;color:var(--muted);"></div>
   </div>
 </div>
 
@@ -614,13 +626,13 @@ const SENTENCES = [
   {ch:'CH03',words:['美術課上','老師','教','我們','摺','紙飛機','。'],correct:'美術課上老師教我們摺紙飛機。',en:'The teacher taught us to fold paper planes.'},
   {ch:'CH03',words:['同學們','在','操場上','跳繩','。'],correct:'同學們在操場上跳繩。',en:'Students skip rope on the playground.'},
   // CH04
-  {ch:'CH04',words:['我','很','興奮','製作','禮物','。'],correct:'我很興奮製作禮物。',en:'I am excited to make the gift.'},
+  {ch:'CH04',words:['製作','禮物','，','我','很','興奮','。'],correct:'製作禮物，我很興奮。',en:'Making gifts, I feel very excited.'},
   {ch:'CH04',words:['禮物','上','有','美麗的','圖案','。'],correct:'禮物上有美麗的圖案。',en:'There is a beautiful pattern on the gift.'},
-  {ch:'CH04',words:['全班','同學','都','很','興奮','去旅行','。'],correct:'全班同學都很興奮去旅行。',en:'The whole class is excited to travel.'},
+  {ch:'CH04',words:['去旅行','，','全班','同學','都','很','興奮','。'],correct:'去旅行，全班同學都很興奮。',en:'Going on a trip, the whole class is excited.'},
   {ch:'CH04',words:['旅行的','目的地','是','日本','。'],correct:'旅行的目的地是日本。',en:'The travel destination is Japan.'},
 ];
 
-// ── Punctuation: fixed ──
+// ── Punctuation: fixed (22 questions) ──
 const PUNCT_QS = [
   {text:['新年快樂','___','恭喜發財','___'],
    slots:[{pos:1,ans:'！'},{pos:3,ans:'！'}],hint:'感歎句用「！」'},
@@ -636,9 +648,39 @@ const PUNCT_QS = [
    slots:[{pos:2,ans:'？'}],hint:'問句句末用「？」'},
   {text:['爸爸問：','___','你給我甚麼禮物','___','___'],
    slots:[{pos:1,ans:'「'},{pos:3,ans:'？'},{pos:4,ans:'」'}],hint:'引號「」包圍說話內容，問句用「？」'},
+  {text:['老師說','___','請大家安靜','___'],
+   slots:[{pos:1,ans:'：'},{pos:3,ans:'。'}],hint:'說話前用「：」，句末用「。」'},
+  {text:['小明問','___','這朵花叫甚麼名字','___','___'],
+   slots:[{pos:1,ans:'「'},{pos:3,ans:'？'},{pos:4,ans:'」'}],hint:'引號包圍說話，問句用「？」'},
+  {text:['花市裡有菊花','___','玫瑰花','___','水仙花','___'],
+   slots:[{pos:1,ans:'、'},{pos:3,ans:'、'},{pos:5,ans:'。'}],hint:'列舉事物用「、」分隔'},
+  {text:['今天天氣真好','___','我們去公園吧','___'],
+   slots:[{pos:1,ans:'，'},{pos:3,ans:'！'}],hint:'停頓用「，」，感歎用「！」'},
+  {text:['媽媽對小明說','___','要好好摺','___','不能心急','___','___'],
+   slots:[{pos:1,ans:'：'},{pos:2,ans:'「'},{pos:4,ans:'。'},{pos:5,ans:'」'}],hint:'說話前用「：」，引號包圍說話'},
+  {text:['這份禮物是誰送的','___'],
+   slots:[{pos:1,ans:'？'}],hint:'問句句末用「？」'},
+  {text:['真漂亮','___','謝謝你','___'],
+   slots:[{pos:1,ans:'！'},{pos:3,ans:'！'}],hint:'感歎句用「！」'},
+  {text:['小紅說','___','我最喜歡','___','恭喜','___'],
+   slots:[{pos:1,ans:'：'},{pos:3,ans:'、'},{pos:5,ans:'。'}],hint:'說話前用「：」，列舉用「、」'},
+  {text:['年獸怕紅色','___','鞭炮聲','___','強光','___'],
+   slots:[{pos:1,ans:'、'},{pos:3,ans:'和'},{pos:5,ans:'。'}],hint:'三個並列項目用「、」和「和」'},
+  {text:['哇','___','青蛙真的跳起來了','___'],
+   slots:[{pos:1,ans:'！'},{pos:3,ans:'！'}],hint:'驚喜感歎用「！」'},
+  {text:['小明問老師','___','這樣摺對嗎','___','___'],
+   slots:[{pos:1,ans:'「'},{pos:3,ans:'？'},{pos:4,ans:'」'}],hint:'問句要有「？」，說話要有引號'},
+  {text:['這個圖案真好看','___','有小花','___','小鳥','___','還有蝴蝶','___'],
+   slots:[{pos:1,ans:'，'},{pos:3,ans:'、'},{pos:5,ans:'、'},{pos:7,ans:'。'}],hint:'用「、」列舉物品'},
+  {text:['小華完成了','___','太棒了','___'],
+   slots:[{pos:1,ans:'，'},{pos:3,ans:'！'}],hint:'停頓用「，」，感歎用「！」'},
+  {text:['老師問','___','誰還沒有完成','___','___'],
+   slots:[{pos:1,ans:'「'},{pos:3,ans:'？'},{pos:4,ans:'」'}],hint:'引號包圍問句'},
+  {text:['圖書館裡很安靜','___','大家都在看書','___'],
+   slots:[{pos:1,ans:'，'},{pos:3,ans:'。'}],hint:'停頓用「，」，陳述句句末用「。」'},
 ];
 
-// ── Measure words: no hints ──
+// ── Measure words: no hints (30 questions) ──
 const MEASURE_QS = [
   {s:['我買了一','___','魚。'],a:'條',opts:['條','隻','個','朵'],e:'🐟'},
   {s:['花園裡有三','___','貓。'],a:'隻',opts:['隻','條','個','朵'],e:'🐱'},
@@ -650,6 +692,26 @@ const MEASURE_QS = [
   {s:['公園裡有一','___','大樹。'],a:'棵',opts:['棵','條','隻','張'],e:'🌳'},
   {s:['我看見一','___','蝴蝶。'],a:'隻',opts:['隻','條','個','朵'],e:'🦋'},
   {s:['老師拿了一','___','信封。'],a:'個',opts:['個','張','條','隻'],e:'✉️'},
+  {s:['小明用一','___','鉛筆寫字。'],a:'枝',opts:['枝','本','張','條'],e:'✏️'},
+  {s:['樹上有兩','___','小鳥。'],a:'隻',opts:['隻','個','條','朵'],e:'🐦'},
+  {s:['我吃了一','___','蘋果。'],a:'個',opts:['個','條','隻','朵'],e:'🍎'},
+  {s:['小明有一','___','書包。'],a:'個',opts:['個','張','本','隻'],e:'🎒'},
+  {s:['媽媽買了一','___','橙。'],a:'個',opts:['個','條','隻','朵'],e:'🍊'},
+  {s:['爸爸買了一','___','報紙。'],a:'份',opts:['份','張','本','條'],e:'📰'},
+  {s:['老師給我們一','___','零食。'],a:'份',opts:['份','個','條','隻'],e:'🍪'},
+  {s:['花瓶裡有五','___','玫瑰花。'],a:'朵',opts:['朵','條','棵','個'],e:'🌹'},
+  {s:['公園裡有一','___','小路。'],a:'條',opts:['條','棵','個','朵'],e:'🛤️'},
+  {s:['我寫了一','___','日記簿。'],a:'本',opts:['本','張','份','條'],e:'📓'},
+  {s:['老師拿出一','___','地圖。'],a:'張',opts:['張','本','份','條'],e:'🗺️'},
+  {s:['媽媽送我一','___','手帕。'],a:'張',opts:['張','本','隻','條'],e:'🧣'},
+  {s:['草地上有一','___','兔子。'],a:'隻',opts:['隻','個','條','朵'],e:'🐰'},
+  {s:['我看見一','___','青蛙。'],a:'隻',opts:['隻','條','個','棵'],e:'🐸'},
+  {s:['公園裡有一','___','花圃。'],a:'個',opts:['個','條','隻','棵'],e:'🌸'},
+  {s:['小花送我一','___','糖果。'],a:'粒',opts:['粒','條','隻','個'],e:'🍬'},
+  {s:['媽媽拿了一','___','水。'],a:'杯',opts:['杯','條','個','隻'],e:'🥤'},
+  {s:['花園裡有很多','___','蜜蜂。'],a:'隻',opts:['隻','朵','個','條'],e:'🐝'},
+  {s:['老師給我一','___','貼紙。'],a:'張',opts:['張','個','條','隻'],e:'⭐'},
+  {s:['爸爸送我一','___','風箏。'],a:'個',opts:['個','條','隻','張'],e:'🪁'},
 ];
 
 // ── Reading passages: fixed grammar ──
@@ -684,14 +746,123 @@ const READINGS = [
       {type:'fill',q:'老師___小華說摺得很好。',a:'稱讚',pool:['稱讚','迎接','躲','完成']},
     ]
   },
+  {
+    title:'爸爸的禮物',ch:'CH04',
+    text:`今天是爸爸的生日。小明很興奮，他親手製作了一份禮物送給爸爸。禮物上有美麗的圖案，是小明自己畫的。爸爸打開禮物，看了很開心，說：「謝謝你！這是我收到最好的禮物！」小明聽了，心裡很溫暖。媽媽說，最好的禮物，是用心製作的。`,
+    qs:[
+      {type:'mc',q:'小明為誰準備禮物？',opts:['老師','同學','爸爸','媽媽'],ans:2},
+      {type:'mc',q:'禮物上有甚麼？',opts:['照片','文字','美麗的圖案','貼紙'],ans:2},
+      {type:'fill',q:'小明親手___了一份禮物。',a:'製作',pool:['製作','完成','稱讚','跳']},
+      {type:'fill',q:'小明很___，想快點送禮物給爸爸。',a:'興奮',pool:['興奮','害怕','難過','耐心']},
+    ]
+  },
+  {
+    title:'學校運動會',ch:'CH01',
+    text:`今天學校舉行運動會，操場上十分熱鬧。同學們穿上運動服，有的跑步，有的跳繩，有的玩接力賽。小紅的班奪得第一名，全班同學都發出歡笑聲，大家緊緊抱在一起。老師站在旁邊，開心地稱讚說：「你們真棒！」小紅覺得今天是最漂亮的一天。`,
+    qs:[
+      {type:'mc',q:'運動會在哪裡舉行？',opts:['課室','操場','圖書館','飯堂'],ans:1},
+      {type:'mc',q:'小紅的班得了甚麼名次？',opts:['第二名','第三名','第一名','沒有名次'],ans:2},
+      {type:'fill',q:'操場上十分___，同學們玩得很開心。',a:'熱鬧',pool:['熱鬧','漂亮','刺眼','害怕']},
+      {type:'fill',q:'全班同學都發出___聲。',a:'歡笑',pool:['歡笑','慶祝','難過','興奮']},
+    ]
+  },
+  {
+    title:'生日派對',ch:'CH04',
+    text:`今天是小明的生日。媽媽幫他準備了一個生日派對，請了很多同學來家裡。同學們帶來了漂亮的禮物，有書本、玩具、還有文具。小明興奮地打開禮物，臉上掛著笑容。大家一起吃蛋糕，唱生日歌，玩得非常開心。這是小明最難忘的一個生日。`,
+    qs:[
+      {type:'mc',q:'誰幫小明準備生日派對？',opts:['爸爸','老師','媽媽','同學'],ans:2},
+      {type:'mc',q:'同學們帶來的禮物有甚麼？',opts:['食物和玩具','書本和玩具','花朵和文具','蛋糕和花'],ans:1},
+      {type:'fill',q:'小明___地打開禮物。',a:'興奮',pool:['興奮','難過','害怕','耐心']},
+      {type:'fill',q:'同學們帶來很多漂亮的___。',a:'禮物',pool:['禮物','圖案','目的地','製作']},
+    ]
+  },
+  {
+    title:'颱風天',ch:'CH02',
+    text:`颱風來了，外面風很大，雨也很大。小明和爸爸媽媽都待在家裡，不能出去。外面的樹被風吹得搖搖晃晃，小明看了有點害怕。媽媽說：「別怕，我們在家裡很安全。」爸爸說：「颱風過後，我們一起去公園慶祝！」小明聽了，心情好了很多，不再難過了。`,
+    qs:[
+      {type:'mc',q:'颱風天小明在哪裡？',opts:['學校','公園','圖書館','家裡'],ans:3},
+      {type:'mc',q:'小明看見外面的樹怎樣了？',opts:['倒下來','搖搖晃晃','很漂亮','不動'],ans:1},
+      {type:'fill',q:'小明看了外面的樹，有點___。',a:'害怕',pool:['害怕','興奮','熱鬧','漂亮']},
+      {type:'fill',q:'爸爸說颱風過後要去公園___。',a:'慶祝',pool:['慶祝','躲','難過','刺眼']},
+    ]
+  },
+  {
+    title:'新學期的第一天',ch:'CH01',
+    text:`今天是新學期的第一天，小明背著新書包去上學。學校的走廊佈置得漂亮，到處都是顏色鮮艷的圖案。班主任老師站在門口迎接每一位同學，面帶笑容。小明走進課室，看見很多新同學，大家互相打招呼，氣氛十分熱鬧。老師說：「希望這個學期大家都很開心！」小明心裡充滿期待。`,
+    qs:[
+      {type:'mc',q:'老師在哪裡迎接同學？',opts:['課室裡','操場上','門口','走廊'],ans:2},
+      {type:'mc',q:'課室的氣氛怎樣？',opts:['安靜','害怕','熱鬧','難過'],ans:2},
+      {type:'fill',q:'走廊上到處都是顏色鮮艷的___。',a:'圖案',pool:['圖案','禮物','目的地','製作']},
+      {type:'fill',q:'老師站在門口___每一位同學。',a:'迎接',pool:['迎接','害怕','躲','完成']},
+    ]
+  },
+  {
+    title:'公園的假日',ch:'CH03',
+    text:`星期日，天氣晴朗，小華和家人去公園玩。公園裡有很多花，紅的、黃的、紫的，非常漂亮。小華和弟弟在草地上跑來跑去，玩得很開心。爸爸很有耐心地教小華放風箏。風箏飛上了天空，小華開心地跳起來，大聲說：「飛起來了！飛起來了！」這真是快樂的一天。`,
+    qs:[
+      {type:'mc',q:'小華和誰去公園？',opts:['老師','朋友','家人','同學'],ans:2},
+      {type:'mc',q:'風箏飛上了天空，小華怎樣？',opts:['哭了','害怕了','生氣了','開心地跳起來'],ans:3},
+      {type:'fill',q:'公園裡的花非常___。',a:'漂亮',pool:['漂亮','熱鬧','難過','刺眼']},
+      {type:'fill',q:'爸爸很有___地教小華放風箏。',a:'耐心',pool:['耐心','興奮','慶祝','歡笑']},
+    ]
+  },
+  {
+    title:'圖書館的下午',ch:'CH02',
+    text:`星期三下午，小明跟媽媽去圖書館。圖書館裡很安靜，大家都在認真看書。小明找到一本關於動物的書，裡面有很多有趣的圖案，非常漂亮。他耐心地把書看完，還做了筆記。離開前，媽媽問：「你喜歡今天嗎？」小明點點頭說：「我喜歡！我下次還想來！」媽媽高興地稱讚他是個愛讀書的好孩子。`,
+    qs:[
+      {type:'mc',q:'小明在圖書館找到甚麼書？',opts:['關於植物的','關於動物的','關於歷史的','關於料理的'],ans:1},
+      {type:'mc',q:'圖書館裡的氣氛怎樣？',opts:['熱鬧','興奮','安靜','難過'],ans:2},
+      {type:'fill',q:'小明___地把書看完，還做了筆記。',a:'耐心',pool:['耐心','害怕','興奮','歡笑']},
+      {type:'fill',q:'書裡有很多有趣的___，非常漂亮。',a:'圖案',pool:['圖案','目的地','禮物','製作']},
+    ]
+  },
 ];
+
+/* ══════════════════════════════════════════
+   AI (DeepSeek) INTEGRATION
+══════════════════════════════════════════ */
+const AI = {
+  key: localStorage.getItem('dsKey') || '',
+  setKey(k){
+    this.key = k.trim();
+    localStorage.setItem('dsKey', this.key);
+    const s = document.getElementById('aiStatus');
+    if(s) s.textContent = this.key ? '✅ API Key 已設定' : '⚠️ 尚未設定 API Key';
+  },
+  async gen(prompt){
+    if(!this.key) return null;
+    try{
+      const r = await fetch('https://api.deepseek.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+this.key},
+        body: JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:prompt}],max_tokens:300,temperature:0.8})
+      });
+      if(!r.ok) return null;
+      const d = await r.json();
+      const text = d.choices?.[0]?.message?.content || '';
+      const m = text.match(/\{[\s\S]*\}/);
+      return m ? JSON.parse(m[0]) : null;
+    }catch(e){ return null; }
+  },
+  async genMW(){
+    return this.gen(`你是香港小一中文科老師。請生成一道量詞填充題。
+規則：只使用常見量詞：個、隻、條、朵、本、張、份、棵、枝、束、粒、杯
+句子要簡單（10字以內），適合小一學生。
+回覆格式（只回覆JSON，不加任何說明）：{"s":["我看見一","___","貓。"],"a":"隻","opts":["隻","條","個","朵"],"e":"🐱"}`);
+  },
+  async genPunct(){
+    return this.gen(`你是香港小一中文科老師。請生成一道標點符號填充題。
+規則：1.只使用：，。？！：「」、 2.句子要簡單適合小一 3.需要1-3個空格
+回覆格式（只回覆JSON，不加任何說明）：{"text":["花市","___","人很多","___"],"slots":[{"pos":1,"ans":"，"},{"pos":3,"ans":"。"}],"hint":"提示文字"}`);
+  },
+};
 
 /* ══════════════════════════════════════════
    STATE
 ══════════════════════════════════════════ */
 const State = {
   students:[],
-  soundOn:true, darkMode:false, showEn:true, showHints:true, timerSecs:0,
+  soundOn:true, darkMode:false, showEn:true, showHints:true, timerSecs:0, activeStudent:0,
 };
 
 /* ══════════════════════════════════════════
@@ -895,13 +1066,23 @@ const App = {
   },
   renderSB(id){
     const el=document.getElementById(id);if(!el)return;
-    el.innerHTML=State.students.map(s=>`
-      <div class="scCard ${s.lvl==='b'?'lvB':''}">
+    // Cards are tappable — teacher taps a student to select who is answering
+    el.innerHTML=State.students.map((s,i)=>`
+      <div class="scCard ${s.lvl==='b'?'lvB':''} ${i===State.activeStudent?'active':''}"
+           onclick="App.setActive(${i})" style="cursor:pointer;transition:all .2s;">
         <div class="scN">${s.name}</div>
         <div class="scS">${s.score}⭐</div>
+        <div class="scPick">${i===State.activeStudent?'▶ 正在答題':'點擊選擇'}</div>
       </div>`).join('');
   },
-  addScore(pts){State.students.forEach(s=>s.score+=pts);this.renderSB('sbHome');},
+  setActive(i){
+    State.activeStudent=i;
+    // Refresh all visible scoreboards
+    document.querySelectorAll('[id$="sb"],[id="sbHome"]').forEach(el=>{
+      if(el.id)App.renderSB(el.id);
+    });
+  },
+  addScore(pts){State.students[State.activeStudent].score+=pts;this.renderSB('sbHome');},
   toggleDark(){State.darkMode=!State.darkMode;document.body.classList.toggle('dark',State.darkMode);},
   toggleSound(){State.soundOn=!State.soundOn;document.getElementById('sndBtn').textContent=State.soundOn?'🔊':'🔇';},
   openTeacher(){
@@ -951,6 +1132,10 @@ const Startup = {
 ══════════════════════════════════════════ */
 const Teacher = {
   syncUI(){
+    const aiInput=document.getElementById('aiKeyInput');
+    if(aiInput)aiInput.value=AI.key;
+    const aiSt=document.getElementById('aiStatus');
+    if(aiSt)aiSt.textContent=AI.key?'✅ API Key 已設定':'⚠️ 尚未設定 API Key';
     document.getElementById('tStList').innerHTML=State.students.map((s,i)=>`
       <div class="stRow">
         <input class="nameInput" value="${s.name}" onchange="State.students[${i}].name=this.value">
@@ -1191,6 +1376,11 @@ const G3={
     this.qi=0;
     this.qs=[...SENTENCES].sort(()=>Math.random()-.5).slice(0,10);
     hideBanner('g3banner');
+    // Clone builder to clear any accumulated drop listeners
+    const oldBld=document.getElementById('g3builder');
+    const newBld=oldBld.cloneNode(false);
+    oldBld.parentNode.replaceChild(newBld,oldBld);
+    drop(newBld,(data,srcEl)=>this.addWord(data,srcEl));
     App.showScreen('g3');App.renderSB('g3sb');this.load();
   },
 
@@ -1211,7 +1401,6 @@ const G3={
 
     const bld=document.getElementById('g3builder');
     bld.innerHTML='<span style="color:var(--muted);font-size:15px;">把詞語拖到這裡排列句子</span>';
-    drop(bld,(data,srcEl)=>this.addWord(data,srcEl));
 
     const hasPK=State.students.some(s=>s.lvl==='b');
     document.getElementById('g3hintBtn').style.display=(State.showHints&&hasPK)?'':'none';
@@ -1340,9 +1529,24 @@ const G4={
 
   done(){
     Reward.celebrate();
-    showBanner('g4banner','g4bannerTxt','g4bannerBtns','🎉 標點符號練習完成！',[
-      {label:'再玩一次',fn:'G4.start()'},{label:'🏠 主頁',fn:'App.showHome()'},
-    ]);
+    const btns=[{label:'再玩一次',fn:'G4.start()'},{label:'🏠 主頁',fn:'App.showHome()'}];
+    if(AI.key) btns.splice(1,0,{label:'🤖 AI生成新題',fn:'G4.generateAI()'});
+    showBanner('g4banner','g4bannerTxt','g4bannerBtns','🎉 標點符號練習完成！',btns);
+  },
+
+  async generateAI(){
+    hideBanner('g4banner');
+    document.getElementById('g4fb').innerHTML='<span style="color:var(--pri)">🤖 AI 正在生成新題目…</span>';
+    const q=await AI.genPunct();
+    if(q&&q.text&&q.slots){
+      this.qs.push(q);
+      document.getElementById('g4fb').textContent='';
+      this.qi=this.qs.length-1;
+      this.load();
+    }else{
+      document.getElementById('g4fb').innerHTML='<span style="color:var(--err)">❌ 生成失敗，請檢查 API Key</span>';
+      setTimeout(()=>G4.start(),2000);
+    }
   },
 };
 
@@ -1399,9 +1603,25 @@ const G5={
 
   done(){
     Reward.celebrate();
-    showBanner('g5banner','g5bannerTxt','g5bannerBtns','🎉 量詞練習完成！太棒了！',[
-      {label:'再玩一次',fn:'G5.start()'},{label:'🏠 主頁',fn:'App.showHome()'},
-    ]);
+    const btns=[{label:'再玩一次',fn:'G5.start()'},{label:'🏠 主頁',fn:'App.showHome()'}];
+    if(AI.key) btns.splice(1,0,{label:'🤖 AI生成新題',fn:'G5.generateAI()'});
+    showBanner('g5banner','g5bannerTxt','g5bannerBtns','🎉 量詞練習完成！太棒了！',btns);
+  },
+
+  async generateAI(){
+    hideBanner('g5banner');
+    document.getElementById('g5fb').innerHTML='<span style="color:var(--pri)">🤖 AI 正在生成新題目…</span>';
+    const q=await AI.genMW();
+    if(q&&q.s&&q.a&&q.opts&&q.e){
+      this.qs.push(q);
+      document.getElementById('g5fb').textContent='';
+      this.qi=this.qs.length-1;
+      this.answered=false;
+      this.load();
+    }else{
+      document.getElementById('g5fb').innerHTML='<span style="color:var(--err)">❌ 生成失敗，請檢查 API Key</span>';
+      setTimeout(()=>G5.start(),2000);
+    }
   },
 };
 
