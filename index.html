@@ -95,7 +95,7 @@ body{font-family:'Noto Sans TC',sans-serif,system-ui;background:var(--bg);color:
 .matchWord.wrong{border-color:var(--err);animation:shake .3s;}
 .matchDef{background:var(--bg2);border:2px solid var(--border);border-radius:12px;
   padding:12px 10px;text-align:center;font-size:15px;cursor:pointer;transition:all .2s;
-  min-height:70px;display:flex;align-items:center;justify-content:center;}
+  min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
 .matchDef.sel{border-color:var(--ok);background:rgba(39,174,96,.08);}
 .matchDef.done{opacity:.3;pointer-events:none;background:var(--ok);color:#fff;border-color:var(--ok);}
 .matchDef.wrong{border-color:var(--err);animation:shake .3s;}
@@ -168,12 +168,15 @@ body{font-family:'Noto Sans TC',sans-serif,system-ui;background:var(--bg);color:
 .gameGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:10px 0;}
 .gameCard{background:var(--bg2);border-radius:var(--rad);padding:18px 12px;text-align:center;
   cursor:pointer;box-shadow:var(--sha);transition:transform .15s,box-shadow .15s;
-  border:2px solid transparent;}
-.gameCard:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.14);}
+  border-top:5px solid var(--pri);position:relative;overflow:hidden;}
+.gameCard::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:inherit;}
+.gameCard:hover{transform:translateY(-4px);box-shadow:0 10px 32px rgba(0,0,0,.18);}
 .gameCard:active{transform:scale(.96);}
-.gcIco{font-size:36px;margin-bottom:8px;}
-.gcNm{font-size:15px;font-weight:800;}
-.gcSub{font-size:12px;color:var(--muted);margin-top:3px;}
+.gcIco{font-size:40px;margin-bottom:10px;}
+.gcNm{font-size:16px;font-weight:900;}
+.gcSub{font-size:12px;color:var(--muted);margin-top:4px;}
+.gc1{border-top-color:#5B5EA6;}.gc2{border-top-color:#E67E22;}.gc3{border-top-color:#27AE60;}
+.gc4{border-top-color:#2980B9;}.gc5{border-top-color:#E91E63;}.gc6{border-top-color:#16A085;}.gc7{border-top-color:#F1C40F;}
 /* Leaderboard */
 .lbRow{display:flex;align-items:center;gap:12px;padding:12px 16px;
   background:var(--bg2);border-radius:12px;margin-bottom:8px;box-shadow:var(--sha);}
@@ -233,13 +236,13 @@ body{font-family:'Noto Sans TC',sans-serif,system-ui;background:var(--bg);color:
   </div>
   <div class="sbArea" id="sbHome"></div>
   <div class="gameGrid">
-    <div class="gameCard" onclick="G1.start()"><div class="gcIco">🎴</div><div class="gcNm">詞語配對</div><div class="gcSub">配對詞語與解釋</div></div>
-    <div class="gameCard" onclick="G2.start()"><div class="gcIco">✏️</div><div class="gcNm">填空練習</div><div class="gcSub">選詞填入句子</div></div>
-    <div class="gameCard" onclick="G3.start()"><div class="gcIco">🔀</div><div class="gcNm">句子重組</div><div class="gcSub">排列正確順序</div></div>
-    <div class="gameCard" onclick="G4.start()"><div class="gcIco">，。</div><div class="gcNm">標點符號</div><div class="gcSub">填入正確標點</div></div>
-    <div class="gameCard" onclick="G5.start()"><div class="gcIco">🔢</div><div class="gcNm">量詞選擇</div><div class="gcSub">選正確量詞</div></div>
-    <div class="gameCard" onclick="G6.start()"><div class="gcIco">📖</div><div class="gcNm">閱讀理解</div><div class="gcSub">讀文章答問題</div></div>
-    <div class="gameCard" onclick="LB.show()"><div class="gcIco">🏆</div><div class="gcNm">排行榜</div><div class="gcSub">查看得分</div></div>
+    <div class="gameCard gc1" onclick="G1.start()"><div class="gcIco">🎴</div><div class="gcNm">詞語配對</div><div class="gcSub">配對詞語與解釋</div></div>
+    <div class="gameCard gc2" onclick="G2.start()"><div class="gcIco">✏️</div><div class="gcNm">填空練習</div><div class="gcSub">選詞填入句子</div></div>
+    <div class="gameCard gc3" onclick="G3.start()"><div class="gcIco">🔀</div><div class="gcNm">句子重組</div><div class="gcSub">排列正確順序</div></div>
+    <div class="gameCard gc4" onclick="G4.start()"><div class="gcIco">，。</div><div class="gcNm">標點符號</div><div class="gcSub">填入正確標點</div></div>
+    <div class="gameCard gc5" onclick="G5.start()"><div class="gcIco">🔢</div><div class="gcNm">量詞選擇</div><div class="gcSub">選正確量詞</div></div>
+    <div class="gameCard gc6" onclick="G6.start()"><div class="gcIco">📖</div><div class="gcNm">閱讀理解</div><div class="gcSub">讀文章答問題</div></div>
+    <div class="gameCard gc7" onclick="LB.show()"><div class="gcIco">🏆</div><div class="gcNm">排行榜</div><div class="gcSub">查看得分</div></div>
   </div>
   <div style="text-align:center;margin-top:8px;">
     <button class="btn bOut bSm" onclick="App.openTeacher()">👩‍🏫 教師面板</button>
@@ -319,9 +322,9 @@ body{font-family:'Noto Sans TC',sans-serif,system-ui;background:var(--bg);color:
   <div class="sbArea" id="g1sb"></div>
   <div class="fb" id="g1fb"></div>
   <div class="matchGrid" id="g1words"></div>
-  <div style="font-size:13px;color:var(--muted);text-align:center;margin:4px 0;">↑ 詞語</div>
+  <div style="font-size:13px;color:var(--muted);text-align:center;margin:4px 0;">↑ 詞語　　點擊詞語，再點擊對應的解釋</div>
   <div class="matchGrid" id="g1defs"></div>
-  <div style="font-size:13px;color:var(--muted);text-align:center;margin:4px 0;">↑ 解釋</div>
+  <div style="font-size:13px;color:var(--muted);text-align:center;margin:4px 0;">↑ 解釋提示</div>
   <div class="completeBanner" id="g1banner"><div class="bigTxt" id="g1bannerTxt"></div><div class="bRow2" id="g1bannerBtns"></div></div>
 </div>
 
@@ -475,65 +478,65 @@ const VOCAB = {
 // 40 fill-in questions (grammar-corrected)
 const FILL_IN = [
   // CH01 熱鬧
-  {ch:'CH01',s:['花市裡十分','BLANK','，人們笑聲不斷。'],a:'熱鬧',h:'很多人，很喧嘩',e:'The market is very lively.'},
-  {ch:'CH01',s:['運動會上，同學們玩得十分','BLANK','。'],a:'熱鬧',h:'很多人，很喧嘩',e:'The sports day is very lively.'},
+  {ch:'CH01',s:['花市裡十分','BLANK','，人們笑聲不斷。'],a:'熱鬧',pool:['熱鬧','漂亮','歡笑','迎接'],h:'很多人，很喧嘩',e:'The market is very lively.'},
+  {ch:'CH01',s:['運動會上，同學們玩得十分','BLANK','。'],a:'熱鬧',pool:['熱鬧','漂亮','歡笑','迎接'],h:'很多人，很喧嘩',e:'The sports day is very lively.'},
   // CH01 漂亮
-  {ch:'CH01',s:['花市裡有很多顏色','BLANK','的花朵。'],a:'漂亮',h:'好看，美麗',e:'There are many beautiful flowers.'},
-  {ch:'CH01',s:['她穿了一件很','BLANK','的裙子。'],a:'漂亮',h:'好看，美麗',e:'She wore a very beautiful dress.'},
+  {ch:'CH01',s:['花市裡有很多顏色','BLANK','的花朵。'],a:'漂亮',pool:['漂亮','熱鬧','歡笑','迎接'],h:'好看，美麗',e:'There are many beautiful flowers.'},
+  {ch:'CH01',s:['她穿了一件很','BLANK','的裙子。'],a:'漂亮',pool:['漂亮','熱鬧','歡笑','迎接'],h:'好看，美麗',e:'She wore a very beautiful dress.'},
   // CH01 歡笑
-  {ch:'CH01',s:['花市裡到處都是','BLANK','聲，大家都很開心。'],a:'歡笑',h:'快樂地笑',e:'The market is filled with laughter.'},
-  {ch:'CH01',s:['運動會上，全班同學發出陣陣','BLANK','聲。'],a:'歡笑',h:'快樂地笑',e:'The class burst into laughter.'},
+  {ch:'CH01',s:['花市裡到處都是','BLANK','聲，大家都很開心。'],a:'歡笑',pool:['歡笑','熱鬧','漂亮','迎接'],h:'快樂地笑',e:'The market is filled with laughter.'},
+  {ch:'CH01',s:['運動會上，全班同學發出陣陣','BLANK','聲。'],a:'歡笑',pool:['歡笑','熱鬧','漂亮','迎接'],h:'快樂地笑',e:'The class burst into laughter.'},
   // CH01 迎接
-  {ch:'CH01',s:['大家在門口','BLANK','新年的到來。'],a:'迎接',h:'去見和接待',e:'Everyone welcomes the new year.'},
-  {ch:'CH01',s:['班主任老師在門口','BLANK','每位同學。'],a:'迎接',h:'去見和接待',e:'The teacher welcomes each student.'},
+  {ch:'CH01',s:['大家在門口','BLANK','新年的到來。'],a:'迎接',pool:['迎接','熱鬧','漂亮','歡笑'],h:'去見和接待',e:'Everyone welcomes the new year.'},
+  {ch:'CH01',s:['班主任老師在門口','BLANK','每位同學。'],a:'迎接',pool:['迎接','熱鬧','漂亮','歡笑'],h:'去見和接待',e:'The teacher welcomes each student.'},
   // CH01 恭喜
-  {ch:'CH01',s:['新年到了，大家互相說：「','BLANK','發財！」'],a:'恭喜',h:'向人表示高興',e:'Everyone says "Congratulations!"'},
-  {ch:'CH01',s:['小明考了第一名，媽媽','BLANK','他做得很好。'],a:'恭喜',h:'向人表示高興',e:'Mom congratulates him for first place.'},
+  {ch:'CH01',s:['新年到了，大家互相說：「','BLANK','發財！」'],a:'恭喜',pool:['恭喜','熱鬧','漂亮','歡笑'],h:'向人表示高興',e:'Everyone says "Congratulations!"'},
+  {ch:'CH01',s:['小明考了第一名，媽媽','BLANK','他做得很好。'],a:'恭喜',pool:['恭喜','熱鬧','漂亮','歡笑'],h:'向人表示高興',e:'Mom congratulates him for first place.'},
   // CH02 害怕
-  {ch:'CH02',s:['年獸出現時，大家都很','BLANK','。'],a:'害怕',h:'感到危險，心裡緊張',e:'Everyone is scared when the beast appears.'},
-  {ch:'CH02',s:['小明第一次上台，心裡有點','BLANK','。'],a:'害怕',h:'感到危險，心裡緊張',e:'He is a little scared on stage.'},
+  {ch:'CH02',s:['年獸出現時，大家都很','BLANK','。'],a:'害怕',pool:['害怕','躲','慶祝','難過'],h:'感到危險，心裡緊張',e:'Everyone is scared when the beast appears.'},
+  {ch:'CH02',s:['小明第一次上台，心裡有點','BLANK','。'],a:'害怕',pool:['害怕','躲','慶祝','難過'],h:'感到危險，心裡緊張',e:'He is a little scared on stage.'},
   // CH02 躲
-  {ch:'CH02',s:['聽到年獸的聲音，人們紛紛','BLANK','起來。'],a:'躲',h:'藏起來，不讓人看見',e:'People hide when they hear the beast.'},
-  {ch:'CH02',s:['下大雨了，大家趕快','BLANK','進屋子裡。'],a:'躲',h:'藏起來，不讓人看見',e:'Everyone hides inside during the rain.'},
+  {ch:'CH02',s:['聽到年獸的聲音，人們紛紛','BLANK','起來。'],a:'躲',pool:['躲','害怕','慶祝','難過'],h:'藏起來，不讓人看見',e:'People hide when they hear the beast.'},
+  {ch:'CH02',s:['下大雨了，大家趕快','BLANK','進屋子裡。'],a:'躲',pool:['躲','害怕','慶祝','難過'],h:'藏起來，不讓人看見',e:'Everyone hides inside during the rain.'},
   // CH02 慶祝
-  {ch:'CH02',s:['年獸走後，人們走出來','BLANK','。'],a:'慶祝',h:'為好事而高興地慶賀',e:'People celebrate after the beast leaves.'},
-  {ch:'CH02',s:['考試完了，同學們一起','BLANK','。'],a:'慶祝',h:'為好事而高興地慶賀',e:'Students celebrate after the exam.'},
+  {ch:'CH02',s:['年獸走後，人們走出來','BLANK','。'],a:'慶祝',pool:['慶祝','害怕','躲','難過'],h:'為好事而高興地慶賀',e:'People celebrate after the beast leaves.'},
+  {ch:'CH02',s:['考試完了，同學們一起','BLANK','。'],a:'慶祝',pool:['慶祝','害怕','躲','難過'],h:'為好事而高興地慶賀',e:'Students celebrate after the exam.'},
   // CH02 難過
-  {ch:'CH02',s:['小明不小心弄壞了玩具，心裡很','BLANK','。'],a:'難過',h:'心情不好，傷心',e:'He feels sad after breaking the toy.'},
-  {ch:'CH02',s:['聽到壞消息，媽媽的心情很','BLANK','。'],a:'難過',h:'心情不好，傷心',e:'Mom feels sad hearing bad news.'},
+  {ch:'CH02',s:['小明不小心弄壞了玩具，心裡很','BLANK','。'],a:'難過',pool:['難過','害怕','躲','慶祝'],h:'心情不好，傷心',e:'He feels sad after breaking the toy.'},
+  {ch:'CH02',s:['聽到壞消息，媽媽的心情很','BLANK','。'],a:'難過',pool:['難過','害怕','躲','慶祝'],h:'心情不好，傷心',e:'Mom feels sad hearing bad news.'},
   // CH02 刺眼
-  {ch:'CH02',s:['早上的太陽太','BLANK','，照得眼睛很痛。'],a:'刺眼',h:'光線太強，眼睛不舒服',e:'The morning sun is too glaring.'},
-  {ch:'CH02',s:['燈光太亮，小明覺得很','BLANK','。'],a:'刺眼',h:'光線太強，眼睛不舒服',e:'The bright light is dazzling.'},
+  {ch:'CH02',s:['早上的太陽太','BLANK','，照得眼睛很痛。'],a:'刺眼',pool:['刺眼','害怕','躲','慶祝'],h:'光線太強，眼睛不舒服',e:'The morning sun is too glaring.'},
+  {ch:'CH02',s:['燈光太亮，小明覺得很','BLANK','。'],a:'刺眼',pool:['刺眼','害怕','躲','慶祝'],h:'光線太強，眼睛不舒服',e:'The bright light is dazzling.'},
   // CH03 摺
-  {ch:'CH03',s:['老師教我們','BLANK','青蛙。'],a:'摺',h:'把紙折疊',e:'The teacher teaches us to fold frogs.'},
-  {ch:'CH03',s:['爸爸用紙','BLANK','了一架飛機給我。'],a:'摺',h:'把紙折疊',e:'Dad folded a paper plane for me.'},
+  {ch:'CH03',s:['老師教我們','BLANK','青蛙。'],a:'摺',pool:['摺','耐心','完成','跳'],h:'把紙折疊',e:'The teacher teaches us to fold frogs.'},
+  {ch:'CH03',s:['爸爸用紙','BLANK','了一架飛機給我。'],a:'摺',pool:['摺','耐心','完成','跳'],h:'把紙折疊',e:'Dad folded a paper plane for me.'},
   // CH03 耐心
-  {ch:'CH03',s:['摺紙需要','BLANK','，不能急。'],a:'耐心',h:'慢慢做，不心急',e:'Paper folding needs patience.'},
-  {ch:'CH03',s:['老師','BLANK','地回答同學的問題。'],a:'耐心',h:'慢慢做，不心急',e:'The teacher patiently answers questions.'},
+  {ch:'CH03',s:['摺紙需要','BLANK','，不能急。'],a:'耐心',pool:['耐心','摺','完成','跳'],h:'慢慢做，不心急',e:'Paper folding needs patience.'},
+  {ch:'CH03',s:['老師','BLANK','地回答同學的問題。'],a:'耐心',pool:['耐心','摺','完成','跳'],h:'慢慢做，不心急',e:'The teacher patiently answers questions.'},
   // CH03 完成
-  {ch:'CH03',s:['小華終於','BLANK','了一隻小青蛙！'],a:'完成',h:'做好，做完',e:'Xiahua finally finished the frog.'},
-  {ch:'CH03',s:['我花了一個小時','BLANK','這幅畫。'],a:'完成',h:'做好，做完',e:'I spent an hour finishing this painting.'},
+  {ch:'CH03',s:['小華終於','BLANK','了一隻小青蛙！'],a:'完成',pool:['完成','摺','耐心','跳'],h:'做好，做完',e:'Xiahua finally finished the frog.'},
+  {ch:'CH03',s:['我花了一個小時','BLANK','這幅畫。'],a:'完成',pool:['完成','摺','耐心','跳'],h:'做好，做完',e:'I spent an hour finishing this painting.'},
   // CH03 跳
-  {ch:'CH03',s:['青蛙放在桌上，輕輕一按就會','BLANK','。'],a:'跳',h:'用腳彈起來',e:'The frog jumps with a gentle press.'},
-  {ch:'CH03',s:['小明聽到好消息，高興地','BLANK','起來。'],a:'跳',h:'用腳彈起來',e:'He jumped for joy at the good news.'},
+  {ch:'CH03',s:['青蛙放在桌上，輕輕一按就會','BLANK','。'],a:'跳',pool:['跳','摺','耐心','完成'],h:'用腳彈起來',e:'The frog jumps with a gentle press.'},
+  {ch:'CH03',s:['小明聽到好消息，高興地','BLANK','起來。'],a:'跳',pool:['跳','摺','耐心','完成'],h:'用腳彈起來',e:'He jumped for joy at the good news.'},
   // CH03 稱讚
-  {ch:'CH03',s:['老師','BLANK','小華說摺得很好。'],a:'稱讚',h:'說別人做得好',e:'The teacher praises Xiahua.'},
-  {ch:'CH03',s:['媽媽','BLANK','弟弟很努力。'],a:'稱讚',h:'說別人做得好',e:'Mom praises the younger brother.'},
+  {ch:'CH03',s:['老師','BLANK','小華說摺得很好。'],a:'稱讚',pool:['稱讚','摺','耐心','完成'],h:'說別人做得好',e:'The teacher praises Xiahua.'},
+  {ch:'CH03',s:['媽媽','BLANK','弟弟很努力。'],a:'稱讚',pool:['稱讚','摺','耐心','完成'],h:'說別人做得好',e:'Mom praises the younger brother.'},
   // CH04 興奮
-  {ch:'CH04',s:['聽說下星期去旅行，小明很','BLANK','。'],a:'興奮',h:'心情非常激動，很期待',e:'He is excited about the trip.'},
-  {ch:'CH04',s:['生日派對要開始了，小紅十分','BLANK','。'],a:'興奮',h:'心情非常激動，很期待',e:'She is very excited for the party.'},
+  {ch:'CH04',s:['聽說下星期去旅行，小明很','BLANK','。'],a:'興奮',pool:['興奮','製作','圖案','平安'],h:'心情非常激動，很期待',e:'He is excited about the trip.'},
+  {ch:'CH04',s:['生日派對要開始了，小紅十分','BLANK','。'],a:'興奮',pool:['興奮','製作','圖案','平安'],h:'心情非常激動，很期待',e:'She is very excited for the party.'},
   // CH04 製作
-  {ch:'CH04',s:['小明親手','BLANK','了一份禮物給爸爸。'],a:'製作',h:'親手做出來',e:'He handmade a gift for dad.'},
-  {ch:'CH04',s:['美術課上，我們','BLANK','了賀卡。'],a:'製作',h:'親手做出來',e:'We made greeting cards in art class.'},
+  {ch:'CH04',s:['小明親手','BLANK','了一份禮物給爸爸。'],a:'製作',pool:['製作','興奮','圖案','平安'],h:'親手做出來',e:'He handmade a gift for dad.'},
+  {ch:'CH04',s:['美術課上，我們','BLANK','了賀卡。'],a:'製作',pool:['製作','興奮','圖案','平安'],h:'親手做出來',e:'We made greeting cards in art class.'},
   // CH04 圖案
-  {ch:'CH04',s:['禮物上畫了很多漂亮的','BLANK','。'],a:'圖案',h:'圖形和花樣',e:'There are beautiful patterns on the gift.'},
-  {ch:'CH04',s:['這件衣服上有美麗的花','BLANK','。'],a:'圖案',h:'圖形和花樣',e:'This shirt has a beautiful floral design.'},
+  {ch:'CH04',s:['禮物上畫了很多漂亮的','BLANK','。'],a:'圖案',pool:['圖案','興奮','製作','平安'],h:'圖形和花樣',e:'There are beautiful patterns on the gift.'},
+  {ch:'CH04',s:['這件衣服上有美麗的花','BLANK','。'],a:'圖案',pool:['圖案','興奮','製作','平安'],h:'圖形和花樣',e:'This shirt has a beautiful floral design.'},
   // CH04 平安
-  {ch:'CH04',s:['飛機平穩降落，全班','BLANK','抵達。'],a:'平安',h:'沒有危險，平平安安',e:'The class arrived safely.'},
-  {ch:'CH04',s:['媽媽每天叮囑我：「','BLANK','回來！」'],a:'平安',h:'沒有危險，平平安平',e:'Mom says "Come home safely!"'},
+  {ch:'CH04',s:['飛機平穩降落，全班','BLANK','抵達。'],a:'平安',pool:['平安','興奮','製作','圖案'],h:'沒有危險，平平安安',e:'The class arrived safely.'},
+  {ch:'CH04',s:['媽媽每天叮囑我：「','BLANK','回來！」'],a:'平安',pool:['平安','興奮','製作','圖案'],h:'沒有危險，平平安平',e:'Mom says "Come home safely!"'},
   // CH04 目的地
-  {ch:'CH04',s:['旅行的','BLANK','是日本東京。'],a:'目的地',h:'旅行要去的地方',e:'The destination is Tokyo, Japan.'},
-  {ch:'CH04',s:['大家都很期待旅行的','BLANK','。'],a:'目的地',h:'旅行要去的地方',e:'Everyone looks forward to the destination.'},
+  {ch:'CH04',s:['旅行的','BLANK','是日本東京。'],a:'目的地',pool:['目的地','興奮','製作','圖案'],h:'旅行要去的地方',e:'The destination is Tokyo, Japan.'},
+  {ch:'CH04',s:['大家都很期待旅行的','BLANK','。'],a:'目的地',pool:['目的地','興奮','製作','圖案'],h:'旅行要去的地方',e:'Everyone looks forward to the destination.'},
 ];
 
 const SENTENCES = [
@@ -579,7 +582,7 @@ const PUNCT_QS = [
   {text:['書包裡有課本','___','文具','___','飯盒','___'],slots:[{pos:1,ans:'、'},{pos:3,ans:'、'},{pos:5,ans:'。'}],hint:'列舉物品用「、」'},
   // Colon standalone
   {text:['老師宣布','___','今天下午有運動會','___'],slots:[{pos:1,ans:'：'},{pos:3,ans:'！'}],hint:'宣布後用「：」，感歎用「！」'},
-  {text:['媽媽問','___','你今天開心嗎','___'],slots:[{pos:1,ans:'：'},{pos:3,ans:'？'}],hint:'說話前用「：」，問句用「？」'},
+  {text:['媽媽問','___','___','你今天開心嗎','___','___'],slots:[{pos:1,ans:'：'},{pos:2,ans:'「'},{pos:4,ans:'？'},{pos:5,ans:'」'}],hint:'說話前用「：」，引號「」包圍說話，問句用「？」'},
   // Quotation marks 「」 — colon always static in text segment
   {text:['媽媽說：','___','今天花市真漂亮。','___'],slots:[{pos:1,ans:'「'},{pos:3,ans:'」'}],hint:'說話內容用引號「」包圍'},
   {text:['老師說：','___','請大家安靜','___','___'],slots:[{pos:1,ans:'「'},{pos:3,ans:'。'},{pos:4,ans:'」'}],hint:'引號「」包圍說話，陳述句用「。」'},
@@ -980,7 +983,7 @@ const G1={
     shuffledDefs.forEach((wd,i)=>{
       const c=document.createElement('div');
       c.className='matchDef';c.dataset.word=wd.w;c.id='g1d'+wd.w;
-      c.innerHTML=`<span>${wd.e}</span>${State.showHints&&State.students[State.activeStudent]?.lvl==='b'?`<br><small style="color:var(--muted);font-size:12px;">${wd.h}</small>`:''}`;
+      c.innerHTML=`<span style="font-size:16px;font-weight:700;">${wd.h}</span>${State.showEn?`<br><small style="color:var(--muted);font-size:12px;">${wd.e}</small>`:''}`;
       c.onclick=()=>this._clickDef(wd.w,c);
       dEl.appendChild(c);
     });
